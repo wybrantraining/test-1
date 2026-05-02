@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Klang Heritage Bingo Hunt</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #D4AF37;
+    --gold-light: #F0D060;
+    --gold-dim: #8B7320;
+    --dark: #0e0e0e;
+    --dark2: #1a1a1a;
+    --dark3: #252525;
+    --dark4: #303030;
+    --text: #f0ead0;
+    --text-muted: #a0946a;
+    --red: #c0392b;
+    --green: #27ae60;
+    --blue: #2980b9;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--dark); color: var(--text); font-family: 'Lato', sans-serif; min-height: 100vh; }
+
+  /* ── NAV ── */
+  #nav { display: flex; gap: 0; border-bottom: 1px solid var(--gold-dim); background: var(--dark2); position: sticky; top: 0; z-index: 100; }
+  .nav-btn { flex: 1; padding: 14px; background: none; border: none; color: var(--text-muted); cursor: pointer; font-family: 'Cinzel', serif; font-size: 13px; letter-spacing: 1px; transition: all .2s; }
+  .nav-btn.active { color: var(--gold); border-bottom: 2px solid var(--gold); background: rgba(212,175,55,.05); }
+  .nav-btn:hover:not(.active) { color: var(--text); background: rgba(255,255,255,.04); }
+
+  /* ── VIEWS ── */
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* ══ SLIDESHOW ══ */
+  #slideshow { position: relative; min-height: calc(100vh - 51px); display: flex; flex-direction: column; }
+  #slide-wrap { flex: 1; overflow: hidden; position: relative; }
+  .slide { display: none; padding: 48px 40px 80px; max-width: 860px; margin: 0 auto; animation: fadeSlide .35s ease; }
+  .slide.active { display: block; }
+  @keyframes fadeSlide { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+  .slide h1 { font-family: 'Cinzel', serif; font-size: clamp(22px, 4vw, 38px); color: var(--gold); margin-bottom: 20px; line-height: 1.2; }
+  .slide h2 { font-family: 'Cinzel', serif; font-size: clamp(16px, 2.5vw, 22px); color: var(--gold-light); margin: 24px 0 12px; }
+  .slide p { line-height: 1.8; color: var(--text); font-size: 15px; margin-bottom: 12px; }
+  .slide ul { list-style: none; padding: 0; }
+  .slide ul li { padding: 6px 0 6px 24px; position: relative; font-size: 14px; color: var(--text); line-height: 1.6; }
+  .slide ul li::before { content: '▸'; position: absolute; left: 0; color: var(--gold); }
+
+  .slide-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(212,175,55,.1); border: 1px solid var(--gold-dim); border-radius: 4px; padding: 6px 14px; font-size: 13px; color: var(--gold); margin: 4px 4px 4px 0; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 16px 0; }
+  .card { background: var(--dark3); border: 1px solid var(--dark4); border-radius: 8px; padding: 16px; }
+  .card .icon { font-size: 28px; margin-bottom: 8px; }
+  .card h3 { font-family: 'Cinzel', serif; font-size: 13px; color: var(--gold); margin-bottom: 6px; }
+  .card p { font-size: 13px; color: var(--text-muted); }
+  .allow { border-left: 3px solid var(--green); }
+  .deny { border-left: 3px solid var(--red); }
+  .card.allow h3 { color: #5dbe87; }
+  .card.deny h3 { color: #e07070; }
+  .emergency-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0; }
+  .em-card { background: var(--dark3); border: 1px solid rgba(212,175,55,.3); border-radius: 8px; padding: 16px; text-align: center; }
+  .em-card .name { font-family: 'Cinzel', serif; color: var(--gold); font-size: 15px; margin: 4px 0; }
+  .em-card .role { font-size: 12px; color: var(--text-muted); margin-bottom: 10px; }
+  .em-card a { color: var(--gold-light); font-size: 18px; font-weight: 700; text-decoration: none; display: block; margin-bottom: 4px; }
+  .penalty-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; }
+  .penalty-table th { background: rgba(212,175,55,.15); color: var(--gold); padding: 10px 14px; text-align: left; font-family: 'Cinzel', serif; font-size: 12px; letter-spacing: 1px; }
+  .penalty-table td { padding: 10px 14px; border-bottom: 1px solid var(--dark4); }
+  .timeline { display: flex; flex-direction: column; gap: 0; margin: 20px 0; }
+  .tl-item { display: flex; gap: 16px; align-items: flex-start; padding: 12px 0; border-bottom: 1px solid var(--dark4); }
+  .tl-time { font-family: 'Cinzel', serif; font-size: 12px; color: var(--gold); min-width: 90px; padding-top: 2px; }
+  .tl-label { font-size: 14px; color: var(--text); }
+  .hero { text-align: center; padding: 20px 0; }
+  .hero-title { font-family: 'Cinzel', serif; font-size: clamp(28px, 6vw, 52px); color: var(--gold); letter-spacing: 4px; text-shadow: 0 0 30px rgba(212,175,55,.3); }
+  .hero-sub { font-size: 15px; color: var(--text-muted); letter-spacing: 3px; margin: 10px 0 30px; }
+  .stat-row { display: flex; justify-content: center; gap: 32px; flex-wrap: wrap; margin: 24px 0; }
+  .stat-item { text-align: center; }
+  .stat-item .val { font-family: 'Cinzel', serif; font-size: 32px; color: var(--gold); }
+  .stat-item .lbl { font-size: 12px; color: var(--text-muted); letter-spacing: 1px; }
+  .rule-priority { display: flex; align-items: center; justify-content: center; gap: 12px; font-size: 20px; flex-wrap: wrap; padding: 20px 0; }
+  .rule-priority .arrow { color: var(--gold-dim); }
+  .rule-priority .item { font-family: 'Cinzel', serif; font-size: 18px; color: var(--gold-light); }
+  .if-rule { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin: 20px 0; }
+  .if-card { background: var(--dark3); border-radius: 8px; padding: 14px; text-align: center; }
+  .if-card .cond { font-family: 'Cinzel', serif; font-size: 13px; color: var(--gold); margin-bottom: 6px; }
+  .if-card .action { font-size: 18px; font-weight: 700; color: var(--red); }
+  .parking-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 16px 0; }
+  .parking-card { background: var(--dark3); border-radius: 8px; overflow: hidden; }
+  .parking-card img { width: 100%; height: 140px; object-fit: cover; }
+  .parking-card .pk-label { padding: 8px 12px; font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
+  .mission-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 20px 0; }
+  .mission-item { background: var(--dark3); border-radius: 8px; padding: 16px; display: flex; gap: 12px; }
+  .mission-item .icon { font-size: 24px; flex-shrink: 0; }
+  .mission-item h3 { font-family: 'Cinzel', serif; font-size: 13px; color: var(--gold); margin-bottom: 4px; }
+  .mission-item p { font-size: 13px; color: var(--text-muted); }
+  .lang-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin: 20px 0; }
+  .lang-card { background: var(--dark3); border-radius: 8px; padding: 20px; text-align: center; }
+  .lang-card .flag { font-size: 32px; margin-bottom: 8px; }
+  .lang-card h3 { font-family: 'Cinzel', serif; font-size: 13px; color: var(--gold); }
+
+  /* BINGO DEMO SLIDE */
+  .bingo-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; max-width: 420px; margin: 16px auto; }
+  .bingo-header { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; max-width: 420px; margin: 20px auto 4px; }
+  .bingo-letter { background: var(--gold); color: var(--dark); font-family: 'Cinzel', serif; font-size: 20px; font-weight: 700; text-align: center; padding: 10px 0; border-radius: 4px; }
+  .bingo-cell { background: var(--dark3); border: 1px solid var(--dark4); border-radius: 4px; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 11px; color: var(--text-muted); text-align: center; padding: 4px; transition: all .2s; user-select: none; position: relative; }
+  .bingo-cell:hover { border-color: var(--gold-dim); color: var(--text); }
+  .bingo-cell.marked { background: rgba(212,175,55,.2); border-color: var(--gold); color: var(--gold); }
+  .bingo-cell.free { background: rgba(212,175,55,.3); border-color: var(--gold); color: var(--gold); }
+  .bingo-cell .checkmark { position: absolute; top: 3px; right: 4px; font-size: 9px; color: var(--gold); }
+  .score-bar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; max-width: 420px; margin: 12px auto; }
+  .score-box { background: var(--dark3); border: 1px solid var(--dark4); border-radius: 6px; padding: 10px; text-align: center; }
+  .score-box .sv { font-family: 'Cinzel', serif; font-size: 20px; color: var(--gold); }
+  .score-box .sl { font-size: 10px; color: var(--text-muted); letter-spacing: 1px; margin-top: 2px; }
+  .total-score { text-align: center; margin: 8px 0; font-family: 'Cinzel', serif; font-size: 28px; color: var(--gold); }
+  .total-label { text-align: center; font-size: 11px; color: var(--text-muted); letter-spacing: 2px; }
+  .bingo-lines { max-width: 420px; margin: 8px auto 0; font-size: 11px; color: var(--text-muted); text-align: center; }
+  .lines-badge { display: inline-block; background: rgba(212,175,55,.15); border: 1px solid var(--gold-dim); border-radius: 3px; padding: 2px 8px; margin: 2px; font-size: 10px; color: var(--gold); }
+  .reset-btn { display: block; margin: 8px auto; background: none; border: 1px solid var(--dark4); color: var(--text-muted); padding: 6px 18px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+  .reset-btn:hover { border-color: var(--gold-dim); color: var(--text); }
+
+  /* ── SLIDE NAV ── */
+  #slide-nav { position: fixed; bottom: 0; left: 0; right: 0; display: flex; align-items: center; justify-content: space-between; background: var(--dark2); border-top: 1px solid var(--dark4); padding: 10px 20px; z-index: 50; }
+  #slide-counter { font-family: 'Cinzel', serif; font-size: 12px; color: var(--text-muted); }
+  .arrow-btn { background: none; border: 1px solid var(--dark4); border-radius: 4px; color: var(--text-muted); padding: 8px 20px; cursor: pointer; font-size: 16px; transition: all .2s; }
+  .arrow-btn:hover { border-color: var(--gold-dim); color: var(--gold); }
+  .progress-bar { height: 2px; background: var(--dark4); position: fixed; top: 51px; left: 0; right: 0; z-index: 99; }
+  .progress-fill { height: 100%; background: var(--gold); transition: width .3s ease; }
+
+  /* ══ SCOREBOARD ══ */
+  #scoreboard { padding: 32px 24px; max-width: 900px; margin: 0 auto; }
+  #scoreboard h1 { font-family: 'Cinzel', serif; color: var(--gold); font-size: 24px; margin-bottom: 8px; }
+  #scoreboard .sub { color: var(--text-muted); font-size: 13px; margin-bottom: 24px; }
+  .team-card { background: var(--dark2); border: 1px solid var(--dark4); border-radius: 10px; padding: 20px; margin-bottom: 12px; display: flex; align-items: center; gap: 16px; transition: border-color .3s; }
+  .team-card.rank-1 { border-color: var(--gold); background: rgba(212,175,55,.06); }
+  .team-card.rank-2 { border-color: #c0c0c0; }
+  .team-card.rank-3 { border-color: #cd7f32; }
+  .rank-badge { font-family: 'Cinzel', serif; font-size: 22px; min-width: 40px; text-align: center; }
+  .rank-1 .rank-badge { color: var(--gold); }
+  .rank-2 .rank-badge { color: #c0c0c0; }
+  .rank-3 .rank-badge { color: #cd7f32; }
+  .team-info { flex: 1; }
+  .team-name { font-family: 'Cinzel', serif; font-size: 16px; color: var(--text); }
+  .team-members { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+  .team-bar-wrap { flex: 2; }
+  .team-bar { background: var(--dark4); border-radius: 3px; height: 8px; overflow: hidden; margin-bottom: 4px; }
+  .team-bar-fill { height: 100%; border-radius: 3px; background: var(--gold); transition: width .6s ease; }
+  .rank-2 .team-bar-fill { background: #c0c0c0; }
+  .rank-3 .team-bar-fill { background: #cd7f32; }
+  .team-stats { display: flex; gap: 16px; font-size: 12px; color: var(--text-muted); }
+  .team-score { font-family: 'Cinzel', serif; font-size: 28px; color: var(--gold); min-width: 80px; text-align: right; }
+  .rank-2 .team-score { color: #c0c0c0; }
+  .rank-3 .team-score { color: #cd7f32; }
+  .tasks-badge { background: rgba(212,175,55,.1); border: 1px solid var(--gold-dim); border-radius: 3px; padding: 2px 8px; font-size: 11px; color: var(--gold); }
+  #last-update { font-size: 11px; color: var(--text-muted); text-align: center; margin-top: 16px; }
+
+  /* ══ ADMIN ══ */
+  #admin { padding: 32px 24px; max-width: 960px; margin: 0 auto; }
+  #admin h1 { font-family: 'Cinzel', serif; color: var(--gold); font-size: 22px; margin-bottom: 4px; }
+  #admin .sub { color: var(--text-muted); font-size: 13px; margin-bottom: 24px; }
+  .admin-lock { background: var(--dark2); border: 1px solid var(--dark4); border-radius: 10px; padding: 40px; text-align: center; max-width: 400px; margin: 40px auto; }
+  .admin-lock h2 { font-family: 'Cinzel', serif; color: var(--gold); font-size: 18px; margin-bottom: 20px; }
+  .admin-lock input { width: 100%; background: var(--dark3); border: 1px solid var(--dark4); border-radius: 6px; padding: 12px 16px; color: var(--text); font-size: 16px; text-align: center; letter-spacing: 4px; margin-bottom: 12px; }
+  .admin-lock input:focus { outline: none; border-color: var(--gold-dim); }
+  .btn-gold { background: var(--gold); color: var(--dark); border: none; border-radius: 6px; padding: 12px 28px; font-family: 'Cinzel', serif; font-size: 14px; cursor: pointer; width: 100%; transition: opacity .2s; }
+  .btn-gold:hover { opacity: .85; }
+  .btn-outline { background: none; border: 1px solid var(--gold-dim); color: var(--gold); border-radius: 6px; padding: 8px 20px; font-size: 13px; cursor: pointer; transition: all .2s; }
+  .btn-outline:hover { background: rgba(212,175,55,.1); }
+  .btn-danger { background: var(--red); color: white; border: none; border-radius: 4px; padding: 6px 14px; font-size: 12px; cursor: pointer; }
+  .admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .admin-panel { background: var(--dark2); border: 1px solid var(--dark4); border-radius: 10px; padding: 20px; }
+  .admin-panel h2 { font-family: 'Cinzel', serif; color: var(--gold); font-size: 15px; margin-bottom: 16px; }
+  .team-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--dark4); }
+  .team-row:last-child { border-bottom: none; }
+  .tr-name { flex: 1; font-size: 14px; }
+  .tr-score { font-family: 'Cinzel', serif; font-size: 16px; color: var(--gold); min-width: 50px; text-align: right; }
+  .point-btns { display: flex; gap: 4px; }
+  .pb { background: var(--dark3); border: 1px solid var(--dark4); color: var(--text); border-radius: 4px; padding: 4px 10px; cursor: pointer; font-size: 12px; transition: all .15s; }
+  .pb:hover { border-color: var(--gold-dim); color: var(--gold); }
+  .pb.plus { border-color: rgba(39,174,96,.4); color: #5dbe87; }
+  .pb.plus:hover { background: rgba(39,174,96,.1); }
+  .pb.minus { border-color: rgba(192,57,43,.4); color: #e07070; }
+  .pb.minus:hover { background: rgba(192,57,43,.1); }
+  .announcement-box { width: 100%; background: var(--dark3); border: 1px solid var(--dark4); border-radius: 6px; padding: 12px; color: var(--text); font-size: 14px; resize: vertical; min-height: 80px; margin-bottom: 10px; }
+  .announcement-box:focus { outline: none; border-color: var(--gold-dim); }
+  select.admin-select { background: var(--dark3); border: 1px solid var(--dark4); border-radius: 6px; padding: 8px 12px; color: var(--text); font-size: 13px; width: 100%; margin-bottom: 8px; }
+  select.admin-select:focus { outline: none; border-color: var(--gold-dim); }
+  input.admin-input { background: var(--dark3); border: 1px solid var(--dark4); border-radius: 6px; padding: 8px 12px; color: var(--text); font-size: 13px; width: 100%; margin-bottom: 8px; }
+  input.admin-input:focus { outline: none; border-color: var(--gold-dim); }
+  .task-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 4px; margin: 10px 0; }
+  .task-cell { background: var(--dark3); border: 1px solid var(--dark4); border-radius: 4px; padding: 6px 4px; text-align: center; font-size: 11px; color: var(--text-muted); cursor: pointer; transition: all .15s; }
+  .task-cell:hover { border-color: var(--gold-dim); color: var(--text); }
+  .task-cell.active { background: rgba(212,175,55,.2); border-color: var(--gold); color: var(--gold); }
+  .announce-list { max-height: 180px; overflow-y: auto; margin-top: 10px; }
+  .an-item { background: var(--dark3); border-left: 3px solid var(--gold-dim); border-radius: 0 6px 6px 0; padding: 8px 12px; margin-bottom: 6px; font-size: 13px; }
+  .an-time { font-size: 10px; color: var(--text-muted); margin-top: 3px; }
+  .setup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0; }
+  .setup-field label { display: block; font-size: 11px; color: var(--text-muted); letter-spacing: 1px; margin-bottom: 4px; }
+  .logout-btn { background: none; border: none; color: var(--text-muted); font-size: 12px; cursor: pointer; margin-left: auto; padding: 4px 10px; }
+  .logout-btn:hover { color: var(--red); }
+  .admin-header { display: flex; align-items: center; margin-bottom: 4px; }
+  .admin-header h1 { margin-bottom: 0; }
+
+  /* ══ ANNOUNCEMENT BANNER ══ */
+  #announce-banner { background: rgba(212,175,55,.12); border-bottom: 1px solid var(--gold-dim); padding: 10px 20px; font-size: 13px; color: var(--gold-light); display: none; text-align: center; }
+
+  /* RESPONSIVE */
+  @media (max-width: 640px) {
+    .admin-grid { grid-template-columns: 1fr; }
+    .grid-2, .grid-3, .if-rule, .parking-grid, .mission-grid, .lang-grid, .emergency-grid { grid-template-columns: 1fr; }
+    .rule-priority { flex-direction: column; gap: 4px; }
+    .slide { padding: 32px 20px 80px; }
+    .stat-row { gap: 20px; }
+    .team-bar-wrap { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div id="announce-banner" id="announce-banner"></div>
+
+<nav id="nav">
+  <button class="nav-btn active" onclick="showView('slideshow')">📋 Briefing</button>
+  <button class="nav-btn" onclick="showView('scoreboard')">🏆 Scoreboard</button>
+  <button class="nav-btn" onclick="showView('admin')">⚙️ Admin</button>
+</nav>
+
+<!-- ══ SLIDESHOW VIEW ══ -->
+<div id="slideshow" class="view active">
+  <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+  <div id="slide-wrap">
+
+    <!-- SLIDE 1 -->
+    <div class="slide active">
+      <div class="hero">
+        <div class="hero-title">🏛️ KLANG HERITAGE<br>BINGO HUNT</div>
+        <div class="hero-sub">Explore • Learn • Compete • Return Safely</div>
+        <div class="stat-row">
+          <div class="stat-item"><div class="val">📍</div><div class="lbl">Klang Heritage Locations</div></div>
+          <div class="stat-item"><div class="val">25</div><div class="lbl">Challenges</div></div>
+          <div class="stat-item"><div class="val">🏅</div><div class="lbl">Points + Bingo Bonus</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 2 -->
+    <div class="slide">
+      <h1>Your Mission</h1>
+      <p>Complete bingo challenges around Klang heritage locations to earn points.</p>
+      <div class="mission-grid">
+        <div class="mission-item"><div class="icon">✅</div><div><h3>Complete Tasks</h3><p>Every completed challenge earns your team points toward the final score.</p></div></div>
+        <div class="mission-item"><div class="icon">🎯</div><div><h3>Hit Bingo Lines</h3><p>Complete a row, column, or diagonal for bonus points on top of task scores.</p></div></div>
+        <div class="mission-item"><div class="icon">🏆</div><div><h3>Highest Score Wins</h3><p>The team with the most total points at the end takes the championship.</p></div></div>
+        <div class="mission-item"><div class="icon">⚠️</div><div><h3>Safety &gt; Speed — Always</h3><p>Rule #1: No task is worth risking injury.</p></div></div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3 - Interactive Bingo Demo -->
+    <div class="slide">
+      <h1>How The Bingo Works</h1>
+      <p>Click any cell to mark it complete — watch your score and lines build up</p>
+      <div class="bingo-header">
+        <div class="bingo-letter">B</div><div class="bingo-letter">I</div><div class="bingo-letter">N</div><div class="bingo-letter">G</div><div class="bingo-letter">O</div>
+      </div>
+      <div class="bingo-grid" id="demo-grid"></div>
+      <div class="score-bar">
+        <div class="score-box"><div class="sv" id="dm-tasks">0/25</div><div class="sl">TASKS DONE</div></div>
+        <div class="score-box"><div class="sv" id="dm-tpts">+0</div><div class="sl">TASK PTS</div></div>
+        <div class="score-box"><div class="sv" id="dm-lines">0/12</div><div class="sl">LINES HIT</div></div>
+      </div>
+      <div class="total-label">TOTAL SCORE</div>
+      <div class="total-score" id="dm-total">0</div>
+      <div class="bingo-lines" id="dm-line-list">Complete a line for bonus!</div>
+      <button class="reset-btn" onclick="resetDemo()">↺ RESET BOARD</button>
+    </div>
+
+    <!-- SLIDE 4 -->
+    <div class="slide">
+      <h1>Read Clues Carefully</h1>
+      <div class="grid-2">
+        <div class="card">
+          <h2>📋 Task Requirements</h2>
+          <ul>
+            <li><strong>ENTIRE TEAM</strong> required — all appear in photo</li>
+            <li><strong>MINIMUM MEMBERS</strong> stated — comply exactly</li>
+            <li><strong>1 REP</strong> — just one person needed</li>
+            <li>If NOT stated — divide &amp; conquer freely</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h2>🧠 Be Creative With Proof</h2>
+          <ul>
+            <li>Use video call screenshots</li>
+            <li>Use reflections (glass/mirror)</li>
+            <li>Creative positioning works</li>
+            <li>Team props or identifiers</li>
+            <li>Plan ahead and regroup</li>
+          </ul>
+        </div>
+      </div>
+      <p style="text-align:center;color:var(--text-muted);margin-top:16px">All members must be represented — how you achieve it is your strategy.</p>
+    </div>
+
+    <!-- SLIDE 5 -->
+    <div class="slide">
+      <h1>Creativity Wins Points</h1>
+      <div class="grid-2">
+        <div class="card allow">
+          <h3>✅ ALLOWED</h3>
+          <ul>
+            <li>Creative poses</li>
+            <li>Acting scenes</li>
+            <li>Storytelling photos</li>
+            <li>Artistic compositions</li>
+          </ul>
+        </div>
+        <div class="card deny">
+          <h3>🚫 NOT ALLOWED</h3>
+          <ul>
+            <li>Blocking walkways</li>
+            <li>Disturbing the public</li>
+            <li>Entering restricted areas</li>
+            <li>Climbing unsafe structures</li>
+          </ul>
+        </div>
+      </div>
+      <p style="text-align:center;color:var(--gold);font-family:'Cinzel',serif;margin-top:20px">🌟 Golden Rule: Be Creative Without Being Disruptive</p>
+    </div>
+
+    <!-- SLIDE 6 -->
+    <div class="slide">
+      <h1>🚗 Driving Safety</h1>
+      <div class="grid-2">
+        <div class="card allow">
+          <h3>✅ DRIVERS MUST</h3>
+          <ul>
+            <li>Follow all traffic laws</li>
+            <li>No speeding</li>
+            <li>No racing other teams</li>
+            <li>No dangerous shortcuts</li>
+          </ul>
+        </div>
+        <div class="card deny">
+          <h3>🚫 STRICTLY PROHIBITED</h3>
+          <ul>
+            <li>Using phone while driving</li>
+            <li>Double parking</li>
+            <li>Illegal U-turns</li>
+            <li>Dangerous stops</li>
+          </ul>
+        </div>
+      </div>
+      <p style="text-align:center;color:var(--red);font-family:'Cinzel',serif;margin-top:20px">🛑 This Is NOT A Road Race</p>
+    </div>
+
+    <!-- SLIDE 7 -->
+    <div class="slide">
+      <h1>Respect Public Space</h1>
+      <div class="grid-2">
+        <div class="card allow">
+          <h3>✅ ALWAYS</h3>
+          <ul>
+            <li>Park legally</li>
+            <li>Use proper parking lots</li>
+            <li>Respect shop owners</li>
+            <li>Keep pathways clear</li>
+          </ul>
+        </div>
+        <div class="card deny">
+          <h3>🚫 DO NOT</h3>
+          <ul>
+            <li>Litter anywhere</li>
+            <li>Move public property</li>
+            <li>Touch shop items without permission</li>
+            <li>Disturb locals</li>
+          </ul>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:center;gap:32px;margin-top:24px;flex-wrap:wrap">
+        <div style="text-align:center"><div style="font-size:32px">🏢</div><div style="font-size:12px;color:var(--text-muted)">Your Company</div></div>
+        <div style="text-align:center"><div style="font-size:32px">🎗️</div><div style="font-size:12px;color:var(--text-muted)">The Organizer</div></div>
+        <div style="text-align:center"><div style="font-size:32px">🧑</div><div style="font-size:12px;color:var(--text-muted)">Yourself</div></div>
+      </div>
+      <p style="text-align:center;color:var(--text-muted);margin-top:8px;font-size:13px">You represent all three. Act professionally.</p>
+    </div>
+
+    <!-- SLIDE 8 -->
+    <div class="slide">
+      <h1>⚠️ Safety Awareness</h1>
+      <div class="grid-3">
+        <div class="card"><div class="icon">🚦</div><h3>Road Crossing</h3><p>Always use pedestrian crossings. Watch for traffic.</p></div>
+        <div class="card"><div class="icon">🌡️</div><h3>Heat Exhaustion</h3><p>Stay hydrated. Rest in shade. Report if unwell.</p></div>
+        <div class="card"><div class="icon">💧</div><h3>Dehydration</h3><p>Drink water consistently throughout the day.</p></div>
+        <div class="card"><div class="icon">🏗️</div><h3>Construction Areas</h3><p>Avoid all construction zones. Do not enter.</p></div>
+        <div class="card"><div class="icon">🧊</div><h3>Slippery Surfaces</h3><p>Walk carefully on wet or uneven surfaces.</p></div>
+        <div class="card"><div class="icon">🤝</div><h3>Help Teammates</h3><p>Look out for each other. No one left behind.</p></div>
+      </div>
+      <p style="text-align:center;color:var(--gold);font-family:'Cinzel',serif;margin-top:16px;font-size:13px;letter-spacing:1px">Move Fast In Thinking — Slow In Movement</p>
+    </div>
+
+    <!-- SLIDE 9 -->
+    <div class="slide">
+      <h1>🌐 Language Support</h1>
+      <p>All clues available in 3 languages</p>
+      <div class="lang-grid">
+        <div class="lang-card"><div class="flag">🇬🇧</div><h3>English</h3></div>
+        <div class="lang-card"><div class="flag">🇲🇾</div><h3>Bahasa Malaysia</h3></div>
+        <div class="lang-card"><div class="flag">🇨🇳</div><h3>中文</h3></div>
+      </div>
+      <p style="text-align:center;color:var(--text-muted);margin-top:16px">💡 Choose the language your team understands best.</p>
+    </div>
+
+    <!-- SLIDE 10 -->
+    <div class="slide">
+      <h1>👕 What To Wear</h1>
+      <div class="grid-2">
+        <div class="card allow">
+          <h3>✅ RECOMMENDED</h3>
+          <ul>
+            <li>Comfortable clothing</li>
+            <li>Sports or walking shoes</li>
+            <li>Light breathable clothes</li>
+          </ul>
+        </div>
+        <div class="card deny">
+          <h3>🚫 AVOID</h3>
+          <ul>
+            <li>Slippers or sandals</li>
+            <li>Formal shoes</li>
+            <li>Heavy bags</li>
+            <li>Restrictive clothing</li>
+          </ul>
+        </div>
+      </div>
+      <div class="grid-3" style="margin-top:16px">
+        <div class="card"><div class="icon">🧢</div><h3>Cap</h3><p>Protect from sun exposure</p></div>
+        <div class="card"><div class="icon">🕶️</div><h3>Sunglasses</h3><p>Eye protection outdoors</p></div>
+        <div class="card"><div class="icon">🧴</div><h3>Sunscreen</h3><p>Apply before you start</p></div>
+      </div>
+    </div>
+
+    <!-- SLIDE 11 -->
+    <div class="slide">
+      <h1>🎒 What To Bring</h1>
+      <div class="grid-3">
+        <div class="card"><div class="icon">📱</div><h3>Charged Phone</h3><p>Fully charged. Team phone with internet access required.</p></div>
+        <div class="card"><div class="icon">🔋</div><h3>Power Bank</h3><p>Keep your phone alive throughout the full day.</p></div>
+        <div class="card"><div class="icon">💧</div><h3>Water Bottle</h3><p>Stay hydrated. Essential for a full day outdoor event.</p></div>
+        <div class="card"><div class="icon">💵</div><h3>Small Cash</h3><p>For unexpected needs, parking, or small purchases.</p></div>
+        <div class="card"><div class="icon">☂️</div><h3>Umbrella</h3><p>Optional — useful if weather changes.</p></div>
+        <div class="card"><div class="icon">🍫</div><h3>Snacks</h3><p>Optional. Keep energy up between activities.</p></div>
+      </div>
+    </div>
+
+    <!-- SLIDE 12 -->
+    <div class="slide">
+      <h1>💬 WhatsApp Group Setup</h1>
+      <p>Each team MUST create a WhatsApp group before start</p>
+      <div class="grid-2">
+        <div class="card">
+          <h2>📲 Include In Group</h2>
+          <ul>
+            <li>All team members</li>
+            <li>Facilitator contact</li>
+            <li>Emergency contact number</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h2>🎯 Group Purpose</h2>
+          <ul>
+            <li>Team coordination</li>
+            <li>Emergency communication</li>
+            <li>Task clarifications</li>
+            <li>Submission backup</li>
+          </ul>
+        </div>
+      </div>
+      <p style="text-align:center;color:var(--gold);font-family:'Cinzel',serif;margin-top:20px">⏰ Do This Before The Hunt Starts</p>
+    </div>
+
+    <!-- SLIDE 13 -->
+    <div class="slide">
+      <h1>🆘 Emergency Contact</h1>
+      <div class="emergency-grid">
+        <div class="em-card"><div style="font-size:32px">👨‍💼</div><div class="name">Bryan</div><div class="role">Game Master</div><a href="tel:+60126611043">012 661 1043</a><div style="display:flex;gap:8px;justify-content:center"><span class="slide-badge">📞 Call</span><span class="slide-badge">💬 WhatsApp</span></div></div>
+        <div class="em-card"><div style="font-size:32px">🛡️</div><div class="name">Sebastian</div><div class="role">Safety Officer</div><a href="tel:+60126365787">012-636 5787</a><div><span class="slide-badge">📞 Call</span></div></div>
+      </div>
+      <div style="display:flex;justify-content:center;gap:16px;flex-wrap:wrap;margin-top:12px">
+        <span class="slide-badge">🤕 Injury</span>
+        <span class="slide-badge">🔍 Lost Participant</span>
+        <span class="slide-badge">🚗 Vehicle Issue</span>
+        <span class="slide-badge">🌡️ Heat Exhaustion</span>
+      </div>
+      <p style="text-align:center;color:var(--red);margin-top:16px;font-family:'Cinzel',serif">Report Early — Not Late</p>
+    </div>
+
+    <!-- SLIDE 14 -->
+    <div class="slide">
+      <h1>⚖️ Play Fair</h1>
+      <div class="grid-2">
+        <div class="card deny">
+          <h3>🚫 DO NOT</h3>
+          <ul>
+            <li>Cheat in any form</li>
+            <li>Submit fake or staged evidence</li>
+            <li>Use old or recycled photos</li>
+            <li>Copy other teams' submissions</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3 style="color:#e07070">⚠️ VIOLATIONS MAY CAUSE</h3>
+          <ul>
+            <li>Point deduction</li>
+            <li>Task disqualification</li>
+            <li>Full team penalty</li>
+          </ul>
+        </div>
+      </div>
+      <p style="text-align:center;color:var(--gold);font-family:'Cinzel',serif;margin-top:20px">🏅 Integrity Matters More Than Winning</p>
+    </div>
+
+    <!-- SLIDE 15 -->
+    <div class="slide">
+      <h1>⏱️ Time Management</h1>
+      <div class="grid-2">
+        <div class="card allow">
+          <h3>✅ SMART TEAMS</h3>
+          <ul>
+            <li>Plan the route first</li>
+            <li>Assign clear roles</li>
+            <li>Prioritize high-value tasks</li>
+            <li>Track time constantly</li>
+          </ul>
+        </div>
+        <div class="card deny">
+          <h3>❌ LOSING TEAMS</h3>
+          <ul>
+            <li>Random running around</li>
+            <li>No internal communication</li>
+            <li>No plan or strategy</li>
+            <li>Wasting time on low scores</li>
+          </ul>
+        </div>
+      </div>
+      <p style="text-align:center;color:var(--gold);font-family:'Cinzel',serif;margin-top:20px">🧠 Strategy Wins More Than Speed</p>
+    </div>
+
+    <!-- SLIDE 16 -->
+    <div class="slide">
+      <h1>🏛️ Respect Heritage Sites</h1>
+      <p>These are real historical locations. Treat them like museums.</p>
+      <div class="card deny" style="margin-top:16px">
+        <ul>
+          <li>🚫 Do NOT climb monuments or heritage structures — even for a photo</li>
+          <li>🚫 Do NOT sit on or lean against heritage structures</li>
+          <li>🚫 Do NOT touch fragile items or artifacts</li>
+          <li>🚫 Do NOT damage, mark, or deface murals and walls</li>
+        </ul>
+      </div>
+      <p style="text-align:center;color:var(--gold);font-family:'Cinzel',serif;margin-top:20px">These Places Are Part Of Malaysia's History.</p>
+    </div>
+
+    <!-- SLIDE 17 -->
+    <div class="slide">
+      <h1>📤 Submission Rules</h1>
+      <div class="card" style="margin-top:16px">
+        <ul>
+          <li>📸 Submit the correct photo — clear, readable, matching the task</li>
+          <li>🆔 Photo must show clear proof of task completion</li>
+          <li>✅ Ensure it is the right task box you are completing</li>
+          <li>👥 Include the right team members as required by the clue</li>
+          <li>⏰ Late submission penalty may apply — submit on time</li>
+          <li>👑 Team Captain submits only — one submission per task</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- SLIDE 18 -->
+    <div class="slide">
+      <h1>⚠️ Penalty System</h1>
+      <table class="penalty-table">
+        <tr><th>Violation</th><th>Consequence</th></tr>
+        <tr><td>🚨 Unsafe Behaviour</td><td style="color:#e07070">-50 pts</td></tr>
+        <tr><td>⏰ Late Submission</td><td style="color:#e07070">-20 pts</td></tr>
+        <tr><td>🅿️ Illegal Parking</td><td style="color:#e07070">-50 pts</td></tr>
+        <tr><td>❌ Fake Submission</td><td style="color:var(--red);font-weight:700">DISQUALIFIED</td></tr>
+      </table>
+      <p style="text-align:center;color:var(--text-muted);margin-top:16px;font-style:italic">Don't Let A Shortcut Cost You The Game</p>
+    </div>
+
+    <!-- SLIDE 19 -->
+    <div class="slide">
+      <h1>🌧️ Weather Protocol</h1>
+      <div class="grid-2">
+        <div class="card">
+          <h2>🌧️ If Heavy Rain</h2>
+          <ul>
+            <li>Pause activity immediately</li>
+            <li>Move to safe shelter</li>
+            <li>Await organizer instructions</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h2>☀️ If Extreme Heat</h2>
+          <ul>
+            <li>Hydrate immediately</li>
+            <li>Rest in shade</li>
+            <li>Inform facilitator if unwell</li>
+          </ul>
+        </div>
+      </div>
+      <p style="text-align:center;color:var(--text-muted);margin-top:20px">🗓️ Organizer May Adjust Game Timing For Safety</p>
+    </div>
+
+    <!-- SLIDE 20 -->
+    <div class="slide">
+      <h1>🆘 If Problems Occur</h1>
+      <div class="grid-3">
+        <div class="card"><div class="icon">🔍</div><h3>Team Gets Lost</h3><p>Contact facilitator immediately via WhatsApp or call.</p></div>
+        <div class="card"><div class="icon">🔋</div><h3>Phone Dies</h3><p>Return to nearest checkpoint right away.</p></div>
+        <div class="card"><div class="icon">🚗</div><h3>Vehicle Breakdown</h3><p>Inform organizer immediately. Stay safe and off road.</p></div>
+      </div>
+      <p style="text-align:center;color:var(--red);font-family:'Cinzel',serif;margin-top:20px">🔕 Never Disappear Without Informing</p>
+    </div>
+
+    <!-- SLIDE 21 -->
+    <div class="slide">
+      <h1>🏛️ Scoring Disputes</h1>
+      <div class="card" style="text-align:center;padding:40px 20px;margin-top:24px">
+        <div style="font-size:40px;margin-bottom:16px">⚖️</div>
+        <h2 style="color:var(--gold);font-family:'Cinzel',serif;font-size:20px">Game Master Decision Is Final</h2>
+        <p style="margin-top:12px;color:var(--text-muted)">Respect decisions to keep the game flowing smoothly for all teams.</p>
+      </div>
+    </div>
+
+    <!-- SLIDE 22 -->
+    <div class="slide">
+      <h1>🤝 Code Of Conduct</h1>
+      <p>This is a corporate event. Act accordingly.</p>
+      <div class="grid-2">
+        <div class="card"><div class="icon">🙏</div><h3>Respectful</h3><p>To locals, teammates, heritage sites, and organizers.</p></div>
+        <div class="card"><div class="icon">🛡️</div><h3>Responsible</h3><p>Own your actions. Be accountable for your team.</p></div>
+        <div class="card"><div class="icon">⚠️</div><h3>Safe</h3><p>Safety first at all times. No exceptions.</p></div>
+        <div class="card"><div class="icon">💼</div><h3>Professional</h3><p>You represent your company. Maintain conduct.</p></div>
+      </div>
+    </div>
+
+    <!-- SLIDE 23 -->
+    <div class="slide">
+      <h1>Today's Journey</h1>
+      <p>Simple. Clear. Structured.</p>
+      <div class="timeline">
+        <div class="tl-item"><div class="tl-time">8:30am</div><div class="tl-label">📋 Briefing</div></div>
+        <div class="tl-item"><div class="tl-time">8:30am – 12pm</div><div class="tl-label">🔍 Hunt</div></div>
+        <div class="tl-item"><div class="tl-time">by 12pm</div><div class="tl-label">📤 Submission</div></div>
+        <div class="tl-item"><div class="tl-time">12:15pm</div><div class="tl-label">🎮 Mini Games</div></div>
+        <div class="tl-item"><div class="tl-time">1:15pm</div><div class="tl-label">🍽️ Lunch</div></div>
+        <div class="tl-item"><div class="tl-time">2:30pm</div><div class="tl-label">🏆 Awards</div></div>
+      </div>
+      <p style="text-align:center;color:var(--gold);font-family:'Cinzel',serif;margin-top:12px">⏰ Game Ends at 12:00pm</p>
+    </div>
+
+    <!-- SLIDE 24 -->
+    <div class="slide">
+      <h1>The Most Important Rule</h1>
+      <div class="rule-priority">
+        <div class="item">🛡️ Safety</div><div class="arrow">›</div>
+        <div class="item">🏅 Reputation</div><div class="arrow">›</div>
+        <div class="item">🤝 Teamwork</div><div class="arrow">›</div>
+        <div class="item">🏆 Winning</div>
+      </div>
+      <div class="if-rule">
+        <div class="if-card"><div class="cond">If Unsafe</div><div class="action">STOP</div></div>
+        <div class="if-card"><div class="cond">If Unsure</div><div class="action" style="color:var(--gold)">ASK</div></div>
+        <div class="if-card"><div class="cond">If Tired</div><div class="action" style="color:#5dbe87">REST</div></div>
+      </div>
+      <p style="text-align:center;color:var(--text-muted);margin-top:12px;font-style:italic">Winning means nothing if someone gets hurt.</p>
+    </div>
+
+    <!-- SLIDE 25 - Final -->
+    <div class="slide">
+      <div class="hero">
+        <div style="font-size:48px;margin-bottom:16px">🎉</div>
+        <h1 style="text-align:center">The Objective</h1>
+        <div class="mission-grid" style="margin-top:24px">
+          <div class="mission-item"><div class="icon">😄</div><div><h3>Have Fun</h3></div></div>
+          <div class="mission-item"><div class="icon">🤝</div><div><h3>Work Together</h3></div></div>
+          <div class="mission-item"><div class="icon">🏛️</div><div><h3>Learn Klang</h3></div></div>
+          <div class="mission-item"><div class="icon">🏠</div><div><h3>Return Safely</h3></div></div>
+        </div>
+        <p style="text-align:center;color:var(--text-muted);margin-top:20px;font-style:italic">Good luck, stay safe, and enjoy the Klang Heritage Bingo Hunt! 🏆</p>
+        <div class="emergency-grid" style="margin-top:24px">
+          <div class="em-card"><div style="font-size:24px">👨‍💼</div><div class="name">Bryan</div><div class="role">Game Master</div><a href="tel:+60126611043">012 661 1043</a></div>
+          <div class="em-card"><div style="font-size:24px">🛡️</div><div class="name">Sebastian</div><div class="role">Safety Officer</div><a href="tel:+60126365787">012-636 5787</a></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 26 - Logistics -->
+    <div class="slide">
+      <h1>📍 Gathering Point</h1>
+      <p>Assembly area — Right outside Wan Hai Office, around the corner</p>
+      <div class="parking-grid">
+        <div class="parking-card"><img src="https://bryanwai1.github.io/klang-heritage-hunt/parking_0.jpg" alt="Parking Entrance" onerror="this.style.display='none'"><div class="pk-label">🅿️ Parking Entrance — ime2 Cashless</div></div>
+        <div class="parking-card"><img src="https://bryanwai1.github.io/klang-heritage-hunt/parking_1.jpg" alt="Parking Bay" onerror="this.style.display='none'"><div class="pk-label">🚗 Parking Bay — Yellow-marked bays</div></div>
+        <div class="parking-card"><img src="https://bryanwai1.github.io/klang-heritage-hunt/parking_2.jpg" alt="Assembly Area" onerror="this.style.display='none'"><div class="pk-label">📍 Assembly Area — Near Wan Hai Office</div></div>
+        <div class="parking-card"><img src="https://bryanwai1.github.io/klang-heritage-hunt/parking_3.jpg" alt="Flag Off" onerror="this.style.display='none'"><div class="pk-label">🏁 Flag-Off Point — Start &amp; Finish here</div></div>
+      </div>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;font-size:13px;color:var(--text-muted)">
+        <span>🕗 Arrive <strong style="color:var(--text)">15 minutes early</strong></span>
+        <span>🅿️ Park at <strong style="color:var(--text)">Times Parking</strong> (ime2 app)</span>
+        <span>🔄 Return here at end of hunt</span>
+      </div>
+    </div>
+
+  </div><!-- end slide-wrap -->
+
+  <!-- slide nav -->
+  <div id="slide-nav">
+    <button class="arrow-btn" onclick="changeSlide(-1)">‹</button>
+    <span id="slide-counter">SLIDE 1 / 26</span>
+    <button class="arrow-btn" onclick="changeSlide(1)">›</button>
+  </div>
+</div>
+
+<!-- ══ SCOREBOARD VIEW ══ -->
+<div id="scoreboard" class="view">
+  <div id="scoreboard">
+    <h1>🏆 Live Scoreboard</h1>
+    <p class="sub">Updates automatically. Refresh anytime.</p>
+    <div id="team-list"></div>
+    <div id="last-update"></div>
+  </div>
+</div>
+
+<!-- ══ ADMIN VIEW ══ -->
+<div id="admin" class="view">
+  <div id="admin-lock-screen">
+    <div class="admin-lock">
+      <h2>🔐 Admin Access</h2>
+      <p style="color:var(--text-muted);font-size:13px;margin-bottom:16px">Enter admin password to continue</p>
+      <input type="password" id="admin-pw" placeholder="••••••••" onkeydown="if(event.key==='Enter')checkAdminPw()">
+      <button class="btn-gold" onclick="checkAdminPw()">Unlock Admin Panel</button>
+      <p id="pw-error" style="color:var(--red);font-size:12px;margin-top:8px;display:none">Incorrect password. Try again.</p>
+    </div>
+  </div>
+
+  <div id="admin-panel" style="display:none">
+    <div class="admin-header">
+      <h1>⚙️ Admin Panel</h1>
+      <button class="logout-btn" onclick="adminLogout()">Logout</button>
+    </div>
+    <p class="sub">Manage teams, award points, and broadcast announcements</p>
+
+    <div class="admin-grid">
+      <!-- Team Scores -->
+      <div class="admin-panel">
+        <h2>🏆 Team Scores</h2>
+        <div id="admin-team-list"></div>
+      </div>
+
+      <!-- Quick Award Points -->
+      <div class="admin-panel">
+        <h2>⚡ Quick Award Points</h2>
+        <label style="font-size:11px;color:var(--text-muted);letter-spacing:1px">SELECT TEAM</label>
+        <select class="admin-select" id="award-team" style="margin-top:4px"></select>
+        <label style="font-size:11px;color:var(--text-muted);letter-spacing:1px;margin-top:10px;display:block">SELECT TASK (optional)</label>
+        <div class="task-grid" id="task-sel"></div>
+        <label style="font-size:11px;color:var(--text-muted);letter-spacing:1px;display:block;margin-top:10px">POINTS</label>
+        <input type="number" class="admin-input" id="award-pts" value="50" min="-500" max="1000" style="margin-top:4px">
+        <label style="font-size:11px;color:var(--text-muted);letter-spacing:1px;display:block;margin-top:10px">REASON (optional)</label>
+        <input type="text" class="admin-input" id="award-reason" placeholder="e.g. Task 12 completed" style="margin-top:4px">
+        <div style="display:flex;gap:8px;margin-top:12px">
+          <button class="btn-gold" onclick="awardPoints()" style="flex:1">Award Points</button>
+          <button class="btn-danger" onclick="deductPoints()">Deduct</button>
+        </div>
+      </div>
+
+      <!-- Announcements -->
+      <div class="admin-panel">
+        <h2>📢 Announcements</h2>
+        <textarea class="announcement-box" id="announce-msg" placeholder="Type announcement to broadcast to all participants..."></textarea>
+        <button class="btn-gold" onclick="sendAnnouncement()" style="width:100%">📡 Broadcast</button>
+        <div class="announce-list" id="announce-history"></div>
+      </div>
+
+      <!-- Team Setup -->
+      <div class="admin-panel">
+        <h2>👥 Team Setup</h2>
+        <div class="setup-grid">
+          <div class="setup-field">
+            <label>TEAM NAME</label>
+            <input type="text" class="admin-input" id="new-team-name" placeholder="e.g. Team Alpha">
+          </div>
+          <div class="setup-field">
+            <label>MEMBERS</label>
+            <input type="text" class="admin-input" id="new-team-members" placeholder="e.g. Ali, Muthu, Mei">
+          </div>
+        </div>
+        <button class="btn-gold" onclick="addTeam()" style="width:100%;margin-bottom:12px">+ Add Team</button>
+        <h2 style="font-size:13px;margin:12px 0 8px">Current Teams</h2>
+        <div id="admin-teams-list2"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ════════════════ STATE ════════════════
+const ADMIN_PW = 'klang2025';
+const STORAGE_KEY = 'klang_hunt_v2';
+let adminUnlocked = false;
+let pollInterval = null;
+
+function defaultState() {
+  return {
+    teams: [
+      { id: 't1', name: 'Team Alpha', members: 'Alice, Bob, Charlie', score: 0, tasks: [], log: [] },
+      { id: 't2', name: 'Team Beta', members: 'Diana, Eric, Frank', score: 0, tasks: [], log: [] },
+      { id: 't3', name: 'Team Gamma', members: 'Grace, Henry, Ivy', score: 0, tasks: [], log: [] },
+    ],
+    announcements: [],
+    lastUpdated: Date.now()
+  };
+}
+
+let state = defaultState();
+
+async function loadState() {
+  try {
+    const r = await window.storage.get(STORAGE_KEY, true);
+    if (r && r.value) state = JSON.parse(r.value);
+  } catch(e) { /* use default */ }
+}
+
+async function saveState() {
+  state.lastUpdated = Date.now();
+  try { await window.storage.set(STORAGE_KEY, JSON.stringify(state), true); } catch(e) {}
+}
+
+// ════════════════ NAV ════════════════
+function showView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(name).classList.add('active');
+  event.currentTarget.classList.add('active');
+  if(name === 'scoreboard') renderScoreboard();
+  if(name === 'admin' && adminUnlocked) renderAdmin();
+}
+
+// ════════════════ SLIDESHOW ════════════════
+let currentSlide = 0;
+const slides = document.querySelectorAll('.slide');
+const total = slides.length;
+
+function goToSlide(n) {
+  slides[currentSlide].classList.remove('active');
+  currentSlide = (n + total) % total;
+  slides[currentSlide].classList.add('active');
+  document.getElementById('slide-counter').textContent = `SLIDE ${currentSlide+1} / ${total}`;
+  document.getElementById('progress').style.width = `${((currentSlide+1)/total)*100}%`;
+}
+function changeSlide(d) { goToSlide(currentSlide + d); }
+
+document.addEventListener('keydown', e => {
+  if(document.getElementById('slideshow').classList.contains('active')) {
+    if(e.key === 'ArrowRight' || e.key === 'ArrowDown') changeSlide(1);
+    if(e.key === 'ArrowLeft' || e.key === 'ArrowUp') changeSlide(-1);
+  }
+});
+goToSlide(0);
+
+// ════════════════ BINGO DEMO ════════════════
+const BINGO_TASKS = ['Selfie at Town Hall','Mural Photo','Kopitiam Visit','Bak Kut Teh','River View','Clock Tower','Sri Mariamman Temple','Chinese Temple','Colonial Building','Heritage Street','FREE','Flag Pose','Water Feature','Market Shot','Old Shophouse','Street Art','Bridge Crossing','Padang Landscape','Mosque Visit','Police Station','War Memorial','Sea Port View','Train Station','Roundabout Hero','Finish Line'];
+
+let demoState = Array(25).fill(false);
+demoState[12] = true;
+
+const LINES = [
+  [0,1,2,3,4],[5,6,7,8,9],[10,11,12,13,14],[15,16,17,18,19],[20,21,22,23,24],
+  [0,5,10,15,20],[1,6,11,16,21],[2,7,12,17,22],[3,8,13,18,23],[4,9,14,19,24],
+  [0,6,12,18,24],[4,8,12,16,20]
+];
+
+function buildDemoGrid() {
+  const g = document.getElementById('demo-grid');
+  g.innerHTML = '';
+  BINGO_TASKS.forEach((t,i) => {
+    const c = document.createElement('div');
+    c.className = 'bingo-cell' + (i===12?' free':'') + (demoState[i]?' marked':'');
+    c.innerHTML = i===12 ? '⭐<br>FREE' : `<span>${t}</span>`;
+    if(i!==12) c.onclick = () => { demoState[i]=!demoState[i]; buildDemoGrid(); };
+    g.appendChild(c);
+  });
+  updateDemoScore();
+}
+
+function updateDemoScore() {
+  const done = demoState.filter(Boolean).length;
+  const tpts = done * 50;
+  let lines = 0, lineNames = [];
+  LINES.forEach((l,i) => { if(l.every(x=>demoState[x])) { lines++; lineNames.push(`Line ${i+1}`); } });
+  const lpts = lines * 100;
+  const full = done===25 ? 500 : 0;
+  const total = tpts + lpts + full;
+  document.getElementById('dm-tasks').textContent = `${done}/25`;
+  document.getElementById('dm-tpts').textContent = `+${tpts}`;
+  document.getElementById('dm-lines').textContent = `${lines}/12`;
+  document.getElementById('dm-total').textContent = total;
+  document.getElementById('dm-line-list').innerHTML = done===25 ? '<span class="lines-badge">🏆 FULL CARD! +500 BONUS</span>' : lineNames.map(n=>`<span class="lines-badge">${n} ✓</span>`).join('') || 'Complete a line for bonus!';
+}
+
+function resetDemo() { demoState = Array(25).fill(false); demoState[12]=true; buildDemoGrid(); }
+buildDemoGrid();
+
+// ════════════════ SCOREBOARD ════════════════
+function renderScoreboard() {
+  const sorted = [...state.teams].sort((a,b) => b.score - a.score);
+  const max = sorted[0]?.score || 1;
+  const list = document.getElementById('team-list');
+  list.innerHTML = sorted.map((t,i) => {
+    const rank = i+1;
+    const pct = Math.max(4, (t.score/Math.max(max,1))*100);
+    return `<div class="team-card rank-${rank<=3?rank:'other'}">
+      <div class="rank-badge">${rank===1?'🥇':rank===2?'🥈':rank===3?'🥉':rank}</div>
+      <div class="team-info">
+        <div class="team-name">${t.name}</div>
+        <div class="team-members">${t.members}</div>
+        <div class="team-stats" style="margin-top:6px">
+          <span class="tasks-badge">✅ ${t.tasks.length} tasks</span>
+        </div>
+      </div>
+      <div class="team-bar-wrap">
+        <div class="team-bar"><div class="team-bar-fill" style="width:${pct}%"></div></div>
+      </div>
+      <div class="team-score">${t.score}</div>
+    </div>`;
+  }).join('');
+  const upd = state.lastUpdated ? new Date(state.lastUpdated).toLocaleTimeString() : '-';
+  document.getElementById('last-update').textContent = `Last updated: ${upd}`;
+}
+
+// ════════════════ ANNOUNCEMENTS ════════════════
+function showAnnouncement(msg) {
+  const b = document.getElementById('announce-banner');
+  b.textContent = '📢 ' + msg;
+  b.style.display = 'block';
+  setTimeout(()=>b.style.display='none', 8000);
+}
+
+async function pollUpdates() {
+  const prevTime = state.lastUpdated;
+  await loadState();
+  if(state.lastUpdated !== prevTime) {
+    if(document.getElementById('scoreboard').classList.contains('active')) renderScoreboard();
+    if(document.getElementById('admin').classList.contains('active') && adminUnlocked) renderAdmin();
+    if(state.announcements.length > 0) {
+      const last = state.announcements[state.announcements.length-1];
+      if(last && Date.now() - last.time < 15000) showAnnouncement(last.msg);
+    }
+  }
+}
+
+// ════════════════ ADMIN ════════════════
+function checkAdminPw() {
+  const pw = document.getElementById('admin-pw').value;
+  if(pw === ADMIN_PW) {
+    adminUnlocked = true;
+    document.getElementById('admin-lock-screen').style.display = 'none';
+    document.getElementById('admin-panel').style.display = 'block';
+    renderAdmin();
+  } else {
+    document.getElementById('pw-error').style.display = 'block';
+  }
+}
+
+function adminLogout() {
+  adminUnlocked = false;
+  document.getElementById('admin-panel').style.display = 'none';
+  document.getElementById('admin-lock-screen').style.display = 'block';
+  document.getElementById('admin-pw').value = '';
+}
+
+function renderAdmin() {
+  renderAdminTeams();
+  renderAwardDropdown();
+  renderAnnounceHistory();
+  renderTeamsList2();
+}
+
+function renderAdminTeams() {
+  const el = document.getElementById('admin-team-list');
+  el.innerHTML = state.teams.map(t => `
+    <div class="team-row">
+      <div class="tr-name">${t.name}<div style="font-size:11px;color:var(--text-muted)">${t.tasks.length} tasks done</div></div>
+      <div class="point-btns">
+        <button class="pb minus" onclick="quickAward('${t.id}',-50)">-50</button>
+        <button class="pb minus" onclick="quickAward('${t.id}',-20)">-20</button>
+        <button class="pb plus" onclick="quickAward('${t.id}',50)">+50</button>
+        <button class="pb plus" onclick="quickAward('${t.id}',100)">+100</button>
+      </div>
+      <div class="tr-score">${t.score}</div>
+    </div>
+  `).join('');
+}
+
+function renderAwardDropdown() {
+  const s = document.getElementById('award-team');
+  s.innerHTML = state.teams.map(t=>`<option value="${t.id}">${t.name}</option>`).join('');
+  const tg = document.getElementById('task-sel');
+  tg.innerHTML = Array.from({length:25},(_,i)=>`<div class="task-cell" id="tc${i}" onclick="toggleTask(${i})">${i+1}</div>`).join('');
+}
+
+let selectedTasks = [];
+function toggleTask(i) {
+  const el = document.getElementById('tc'+i);
+  const idx = selectedTasks.indexOf(i);
+  if(idx>=0) { selectedTasks.splice(idx,1); el.classList.remove('active'); }
+  else { selectedTasks.push(i); el.classList.add('active'); }
+}
+
+async function quickAward(teamId, pts) {
+  const t = state.teams.find(x=>x.id===teamId);
+  if(!t) return;
+  t.score += pts;
+  t.log.push({ time: Date.now(), pts, reason: 'Quick award' });
+  await saveState();
+  renderAdmin();
+}
+
+async function awardPoints() {
+  const teamId = document.getElementById('award-team').value;
+  const pts = parseInt(document.getElementById('award-pts').value) || 0;
+  const reason = document.getElementById('award-reason').value || '';
+  const t = state.teams.find(x=>x.id===teamId);
+  if(!t) return;
+  t.score += pts;
+  selectedTasks.forEach(i => { if(!t.tasks.includes(i)) t.tasks.push(i); });
+  t.log.push({ time: Date.now(), pts, reason, tasks: [...selectedTasks] });
+  selectedTasks = [];
+  document.getElementById('award-pts').value = 50;
+  document.getElementById('award-reason').value = '';
+  document.querySelectorAll('.task-cell').forEach(c=>c.classList.remove('active'));
+  await saveState();
+  renderAdmin();
+  alert(`✅ ${pts > 0 ? '+' : ''}${pts} pts awarded to ${t.name}`);
+}
+
+async function deductPoints() {
+  const teamId = document.getElementById('award-team').value;
+  const pts = Math.abs(parseInt(document.getElementById('award-pts').value) || 0);
+  const reason = document.getElementById('award-reason').value || 'Deduction';
+  const t = state.teams.find(x=>x.id===teamId);
+  if(!t) return;
+  t.score -= pts;
+  t.log.push({ time: Date.now(), pts: -pts, reason });
+  await saveState();
+  renderAdmin();
+  alert(`⚠️ -${pts} pts deducted from ${t.name}`);
+}
+
+async function sendAnnouncement() {
+  const msg = document.getElementById('announce-msg').value.trim();
+  if(!msg) return;
+  state.announcements.push({ time: Date.now(), msg });
+  if(state.announcements.length > 20) state.announcements.shift();
+  document.getElementById('announce-msg').value = '';
+  await saveState();
+  renderAnnounceHistory();
+  showAnnouncement(msg);
+  alert('📡 Announcement broadcasted!');
+}
+
+function renderAnnounceHistory() {
+  const el = document.getElementById('announce-history');
+  const sorted = [...state.announcements].reverse();
+  el.innerHTML = sorted.map(a => `
+    <div class="an-item">
+      ${a.msg}
+      <div class="an-time">${new Date(a.time).toLocaleTimeString()}</div>
+    </div>
+  `).join('') || '<p style="color:var(--text-muted);font-size:13px">No announcements yet.</p>';
+}
+
+async function addTeam() {
+  const name = document.getElementById('new-team-name').value.trim();
+  const members = document.getElementById('new-team-members').value.trim();
+  if(!name) return alert('Team name required');
+  state.teams.push({ id: 't'+Date.now(), name, members: members||'TBD', score: 0, tasks: [], log: [] });
+  document.getElementById('new-team-name').value = '';
+  document.getElementById('new-team-members').value = '';
+  await saveState();
+  renderAdmin();
+}
+
+async function removeTeam(id) {
+  if(!confirm('Remove this team?')) return;
+  state.teams = state.teams.filter(t=>t.id!==id);
+  await saveState();
+  renderAdmin();
+}
+
+function renderTeamsList2() {
+  const el = document.getElementById('admin-teams-list2');
+  el.innerHTML = state.teams.map(t=>`
+    <div class="team-row">
+      <div style="flex:1">
+        <div style="font-size:14px">${t.name}</div>
+        <div style="font-size:11px;color:var(--text-muted)">${t.members}</div>
+      </div>
+      <button class="btn-danger" onclick="removeTeam('${t.id}')">Remove</button>
+    </div>
+  `).join('') || '<p style="color:var(--text-muted);font-size:13px">No teams added.</p>';
+}
+
+// ════════════════ INIT ════════════════
+async function init() {
+  await loadState();
+  pollInterval = setInterval(pollUpdates, 5000);
+}
+init();
+</script>
+</body>
+</html>
